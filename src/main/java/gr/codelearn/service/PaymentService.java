@@ -4,18 +4,13 @@
  */
 package gr.codelearn.service;
 
-import gr.codelearn.domain.Item;
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  *
  * @author mcjohn1
  */
-public interface CartService {
-    boolean addItem(Item item) throws Exception;
-    boolean removeItem(Item item);
-    List<Item> getCartItems();
-    BigDecimal getTotalPrice();
-    boolean checkout();
+public interface PaymentService {
+    BigDecimal getBalance();
+    boolean withdraw(BigDecimal amount);
 }

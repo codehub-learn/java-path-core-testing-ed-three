@@ -16,17 +16,34 @@ import java.util.List;
 public class CartServiceImpl implements CartService {
 
     private final List<Item> cart;
+    private final PaymentService paymentService;
 
-    public CartServiceImpl() {
+    public CartServiceImpl(PaymentService paymentService) {
         cart = new ArrayList<>();
+        this.paymentService = paymentService;
     }
 
     @Override
-    public boolean addItem(Item item) {
-        if (item != null) {
-            return cart.add(item);
+    public boolean addItem(Item item) throws Exception {
+        if (item == null) {
+            throw new Exception("Item added was incorrect.");
+        } else {
+            if (item.getQuantity() > 0) {
+                return addOrIncreaseQuantity(item);
+            } else {
+                return false;
+            }
         }
-        return false;
+    }
+
+    private boolean addOrIncreaseQuantity(Item itemToBeAdded) {
+        for (Item item : cart) {
+            if (item.equals(itemToBeAdded)) {
+                item.setQuantity(item.getQuantity() + itemToBeAdded.getQuantity());
+                return true;
+            }
+        }
+        return cart.add(itemToBeAdded);
     }
 
     @Override
@@ -46,8 +63,13 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public boolean checkout() {
-        cart.clear();
-        return true;
+        BigDecimal totalPrice = getTotalPrice();
+        if (paymentService.getBalance().doubleValue() >= totalPrice.doubleValue()) {
+            cart.clear();
+            paymentService.withdraw(totalPrice);
+            return true;
+        }
+        return false;
     }
 
 }
